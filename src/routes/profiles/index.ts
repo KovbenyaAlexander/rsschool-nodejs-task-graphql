@@ -20,7 +20,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (fastify): Promise<void> 
       const profile = await fastify.db.profiles.findOne({ key: "id", equals: profileId });
 
       if (!profile) {
-        throw fastify.httpErrors.badRequest("profile not found");
+        throw reply.code(404);
       }
 
       return profile;
@@ -35,6 +35,11 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (fastify): Promise<void> 
       },
     },
     async function (request, reply): Promise<ProfileEntity> {
+      const user = await fastify.db.profiles.findOne({ key: "id", equals: request.body.userId });
+      if (!user) {
+        throw reply.code(400);
+      }
+
       const newProfile = await fastify.db.profiles.create(request.body);
       return newProfile;
     }
@@ -52,7 +57,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (fastify): Promise<void> 
       const profile = await fastify.db.profiles.findOne({ key: "id", equals: profileId });
 
       if (!profile) {
-        throw fastify.httpErrors.badRequest("profile not found");
+        throw reply.code(400);
       }
 
       return await fastify.db.profiles.delete(profileId);
@@ -73,7 +78,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (fastify): Promise<void> 
 
       const profile = await fastify.db.profiles.findOne({ key: "id", equals: profileId });
       if (!profile) {
-        throw fastify.httpErrors.badRequest("profile not found");
+        throw reply.code(400);
       }
 
       const newProfile = await fastify.db.profiles.change(profileId, profileUpdate);

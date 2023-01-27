@@ -19,7 +19,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (fastify): Promise<void> 
       const userId = request.params.id;
       const user = await fastify.db.users.findOne({ key: "id", equals: userId });
       if (!user) {
-        throw fastify.httpErrors.badRequest("user not found");
+        throw reply.code(404);
       }
       return user;
     }
@@ -50,8 +50,32 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (fastify): Promise<void> 
       const user = await fastify.db.users.findOne({ key: "id", equals: userId });
 
       if (!user) {
-        throw fastify.httpErrors.badRequest("user not found");
+        throw reply.code(400);
       }
+
+      const userPosts = await fastify.db.posts.findMany({ key: "userId", equals: userId });
+
+      userPosts.forEach(async (post) => {
+        await fastify.db.posts.delete(post.id);
+      });
+
+      const userSubscribers = await fastify.db.users.findMany({
+        key: "subscribedToUserIds",
+        inArray: userId,
+      });
+
+      userSubscribers.forEach(async (subscriber) => {
+        const id = subscriber.subscribedToUserIds.indexOf(userId);
+
+        const newSub = [
+          ...subscriber.subscribedToUserIds.slice(0, id),
+          ...subscriber.subscribedToUserIds.slice(id + 1),
+        ];
+
+        fastify.db.users.change(subscriber.id, {
+          subscribedToUserIds: newSub,
+        });
+      });
 
       return await fastify.db.users.delete(userId);
     }
@@ -72,7 +96,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (fastify): Promise<void> 
       const user = await fastify.db.users.findOne({ key: "id", equals: userId });
 
       if (!user) {
-        throw fastify.httpErrors.badRequest("user not found");
+        throw reply.code(400);
       }
 
       const newUser = await fastify.db.users.change(userId, {
@@ -94,10 +118,15 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (fastify): Promise<void> 
     async function (request, reply): Promise<UserEntity> {
       const userId = request.body.userId;
       const usersIdForUnsubscribe = request.params.id;
-      const user = await fastify.db.users.findOne({ key: "id", equals: userId });
 
+      const user = await fastify.db.users.findOne({ key: "id", equals: userId });
       if (!user) {
-        throw fastify.httpErrors.badRequest("user not found");
+        throw reply.code(404);
+      }
+
+      const isSubscriber = user.subscribedToUserIds.includes(usersIdForUnsubscribe);
+      if (!isSubscriber) {
+        throw reply.code(400);
       }
 
       const newSubscribedIds = user.subscribedToUserIds.filter(
@@ -127,7 +156,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (fastify): Promise<void> 
       const user = await fastify.db.users.findOne({ key: "id", equals: userId });
 
       if (!user) {
-        throw fastify.httpErrors.badRequest("user not found");
+        throw reply.code(400);
       }
 
       const newUser = await fastify.db.users.change(userId, userUpdate);

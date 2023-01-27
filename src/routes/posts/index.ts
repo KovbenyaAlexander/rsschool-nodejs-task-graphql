@@ -21,7 +21,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (fastify): Promise<void> 
       const post = await fastify.db.posts.findOne({ key: "id", equals: postId });
 
       if (!post) {
-        throw fastify.httpErrors.badRequest("post not found");
+        throw reply.code(404);
       }
 
       return post;
@@ -53,7 +53,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (fastify): Promise<void> 
       const post = await fastify.db.posts.findOne({ key: "id", equals: postId });
 
       if (!post) {
-        throw fastify.httpErrors.badRequest("post not found");
+        throw reply.code(400);
       }
 
       return await fastify.db.posts.delete(postId);
@@ -74,7 +74,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (fastify): Promise<void> 
       const postUpdate = request.body;
 
       if (!post) {
-        throw fastify.httpErrors.badRequest("post not found");
+        throw reply.code(400);
       }
 
       const newPost = await fastify.db.posts.change(postId, postUpdate);
