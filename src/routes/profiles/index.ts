@@ -35,8 +35,20 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (fastify): Promise<void> 
       },
     },
     async function (request, reply): Promise<ProfileEntity> {
-      const user = await fastify.db.profiles.findOne({ key: "id", equals: request.body.userId });
-      if (!user) {
+      const user = await fastify.db.profiles.findOne({
+        key: "userId",
+        equals: request.body.userId,
+      });
+      if (user) {
+        throw reply.code(400);
+      }
+
+      const memberTypeId = request.body.memberTypeId;
+      const isMemberTypeExist = await fastify.db.memberTypes.findOne({
+        key: "id",
+        equals: memberTypeId,
+      });
+      if (!isMemberTypeExist) {
         throw reply.code(400);
       }
 
