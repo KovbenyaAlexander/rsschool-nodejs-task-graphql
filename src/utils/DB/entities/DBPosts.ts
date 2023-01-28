@@ -22,7 +22,7 @@ export default class DBPosts extends DBEntity<
       id: "11",
       content: "asd",
       title: "ad",
-      userId: "userID",
+      userId: "userID_1",
     });
   }
   async create(dto: CreatePostDTO) {

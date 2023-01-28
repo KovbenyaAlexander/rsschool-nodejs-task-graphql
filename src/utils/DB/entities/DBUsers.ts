@@ -20,7 +20,7 @@ export default class DBUsers extends DBEntity<
     super();
 
     this.entities.push({
-      id: "1234",
+      id: "userID_1",
       email: "qwe@gmail.com",
       firstName: "sanya",
       lastName: "K",
