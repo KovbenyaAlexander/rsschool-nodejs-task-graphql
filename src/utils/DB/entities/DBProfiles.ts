@@ -32,7 +32,7 @@ export default class DBProfiles extends DBEntity<
       memberTypeId: "memberTypeIdE",
       sex: "M",
       street: "qwe",
-      userId: "userID",
+      userId: "userID_1",
     });
   }
 
