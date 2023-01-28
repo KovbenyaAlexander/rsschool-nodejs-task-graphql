@@ -41,6 +41,11 @@ const schema = buildSchema(`
     memberTypes: [MemberType]
     posts: [Post]
     profiles: [Profile]
+
+    memberType(memberId: String): MemberType
+    user(userId: String): User
+    profile(profileId: String): Profile
+    post(postId: String): Post
   }
 
 `);
@@ -68,6 +73,35 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         },
         profiles: async () => {
           return await fastify.db.profiles.findMany();
+        },
+
+        memberType: async () => {
+          const id = String(request.body.variables!.memberId);
+          return await fastify.db.memberTypes.findOne({
+            key: "id",
+            equals: id,
+          });
+        },
+        user: async () => {
+          const id = String(request.body.variables!.userId);
+          return await fastify.db.users.findOne({
+            key: "id",
+            equals: id,
+          });
+        },
+        post: async () => {
+          const id = String(request.body.variables!.postId);
+          return await fastify.db.posts.findOne({
+            key: "id",
+            equals: id,
+          });
+        },
+        profile: async () => {
+          const id = String(request.body.variables!.profileId);
+          return await fastify.db.profiles.findOne({
+            key: "id",
+            equals: id,
+          });
         },
       };
 
