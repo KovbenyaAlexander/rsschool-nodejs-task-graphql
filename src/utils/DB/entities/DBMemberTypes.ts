@@ -27,7 +27,7 @@ export default class DBMemberTypes extends DBEntity<
       monthPostsLimit: 100,
     });
     this.create({
-      id: "userID_1",
+      id: "memberTypeID_1",
       discount: 555,
       monthPostsLimit: 999,
     });

@@ -29,7 +29,7 @@ export default class DBProfiles extends DBEntity<
       birthday: 123,
       city: "qwe",
       country: "qwe",
-      memberTypeId: "memberTypeIdE",
+      memberTypeId: "memberTypeID_1",
       sex: "M",
       street: "qwe",
       userId: "userID_1",
