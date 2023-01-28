@@ -46,6 +46,16 @@ const schema = buildSchema(`
     memberType: MemberType
   }
 
+  type UserInfo{
+    id: String
+    firstName: String
+    lastName: String
+    email: String
+    posts: [Post]
+    profile: Profile
+    memberType: MemberType
+  }
+
   type Query {
     users: [User]
     memberTypes: [MemberType]
@@ -58,6 +68,8 @@ const schema = buildSchema(`
     post(postId: String): Post
 
     getUsersInfo: [UsersInfo]
+
+    getUserInfoById(userId: String): UserInfo
   }
 
 `);
@@ -104,7 +116,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         post: async () => {
           const id = String(request.body.variables!.postId);
           return await fastify.db.posts.findOne({
-            key: "id",
+            key: "userId",
             equals: id,
           });
         },
@@ -132,14 +144,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
 
             const memberType = await fastify.db.memberTypes.findOne({
               key: "id",
-              equals: String(profile?.userId),
-            });
-
-            console.log({
-              ...user,
-              posts,
-              profile,
-              memberType,
+              equals: String(profile?.memberTypeId),
             });
 
             return {
@@ -149,6 +154,45 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
               memberType,
             };
           });
+        },
+
+        getUserInfoById: async () => {
+          const id = String(request.body.variables!.userId);
+          const user = await fastify.db.users.findOne({
+            key: "id",
+            equals: id,
+          });
+
+          if (!user) return [];
+
+          const posts = await fastify.db.posts.findMany({
+            key: "userId",
+            equals: id,
+          });
+
+          const profile = await fastify.db.profiles.findOne({
+            key: "userId",
+            equals: id,
+          });
+
+          const memberType = await fastify.db.memberTypes.findOne({
+            key: "id",
+            equals: String(profile?.memberTypeId),
+          });
+
+          console.log({
+            ...user,
+            posts,
+            profile,
+            memberType,
+          });
+
+          return {
+            ...user,
+            posts,
+            profile,
+            memberType,
+          };
         },
       };
 
