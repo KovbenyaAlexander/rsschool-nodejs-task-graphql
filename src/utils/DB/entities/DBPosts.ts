@@ -19,7 +19,7 @@ export default class DBPosts extends DBEntity<
     super();
 
     this.entities.push({
-      id: "11",
+      id: "post_id",
       content: "asd",
       title: "ad",
       userId: "userID_1",
