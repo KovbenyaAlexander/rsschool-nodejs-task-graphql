@@ -114,8 +114,17 @@ const schema = buildSchema(`
   }
   
   type Mutation{
-
-    createUser( firstName: String, lastName: String, email: String): User
+    createUser(firstName: String, lastName: String, email: String): User
+    createProfile(      
+      avatar: String,
+      birthday: Int,
+      city: String,
+      country: String,
+      memberTypeId: String,
+      sex: String,
+      street: String,
+      userId: String
+                  ):Profile
   }
 
 `);
@@ -304,6 +313,32 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
           });
 
           return user;
+        },
+
+        createProfile: async () => {
+          const {
+            avatar,
+            birthday,
+            city,
+            country,
+            memberTypeId,
+            sex,
+            street,
+            userId,
+          }: any = request.body.variables;
+
+          const profile = await fastify.db.profiles.create({
+            avatar,
+            birthday,
+            city,
+            country,
+            memberTypeId,
+            sex,
+            street,
+            userId,
+          });
+
+          return profile;
         },
       };
 
