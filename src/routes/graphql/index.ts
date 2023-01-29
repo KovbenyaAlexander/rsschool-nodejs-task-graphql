@@ -106,22 +106,33 @@ const schema = buildSchema(`
     getUsersWithSubs: [UsersWithSubs]
   }
 
+  input UserInput{
+    firstName: String!,
+    lastName: String!,
+    email: String!
+  }
 
+  input ProfileInput{
+    avatar: String
+    sex: String
+    birthday: Int
+    country: String
+    street: String
+    city: String
+    memberTypeId: String
+    userId: String
+  }
+
+  input PostInput{
+    title: String
+    content: String
+    userId: String
+  }
 
   type Mutation{
-    createUser(firstName: String, lastName: String, email: String): User
-
-    createProfile(      
-      avatar: String,
-      birthday: Int,
-      city: String,
-      country: String,
-      memberTypeId: String,
-      sex: String,
-      street: String,
-      userId: String):Profile
-
-    createPost(title: String, content: String, userId: String):Post
+    createUser(input: UserInput): User
+    createProfile(input: ProfileInput):Profile
+    createPost(input: PostInput):Post
   }
 `);
 
@@ -301,7 +312,8 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         },
 
         createUser: async () => {
-          const { firstName, lastName, email }: any = request.body.variables;
+          const { firstName, lastName, email }: any =
+            request.body.variables!.input;
           const user = await fastify.db.users.create({
             email,
             firstName,
@@ -321,7 +333,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
             sex,
             street,
             userId,
-          }: any = request.body.variables;
+          }: any = request.body.variables!.input;
 
           const profile = await fastify.db.profiles.create({
             avatar,
@@ -338,7 +350,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         },
 
         createPost: async () => {
-          const { title, content, userId }: any = request.body.variables;
+          const { title, content, userId }: any = request.body.variables!.input;
 
           const post = await fastify.db.posts.create({
             content,
