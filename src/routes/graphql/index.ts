@@ -92,7 +92,7 @@ const schema = buildSchema(`
 
     getUserSubscribedTo: [UserSubscribedTo]
 
-    getSubscribedToUser: [SubscribedToUser]
+    getSubscribedToUser(userId: String): SubscribedToUser
   
   }
 
@@ -237,21 +237,22 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         },
 
         getSubscribedToUser: async () => {
-          const users = await fastify.db.users.findMany();
+          const id = String(request.body.variables!.userId);
 
-          const response = users.map(async (user) => {
-            const posts = await fastify.db.posts.findMany({
-              key: "userId",
-              equals: user.id,
-            });
-
-            return {
-              ...user,
-              posts,
-            };
+          const user = await fastify.db.users.findOne({
+            key: "id",
+            equals: id,
           });
 
-          return response;
+          const posts = await fastify.db.posts.findMany({
+            key: "userId",
+            equals: id,
+          });
+
+          return {
+            ...user,
+            posts,
+          };
         },
       };
 
