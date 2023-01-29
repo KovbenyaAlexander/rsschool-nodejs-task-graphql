@@ -106,6 +106,18 @@ const schema = buildSchema(`
     getUsersWithSubs: [UsersWithSubs]
   }
 
+
+  input UserInput {
+    firstName: String!
+    lastName: String!
+    email: String!
+  }
+  
+  type Mutation{
+
+    createUser( firstName: String, lastName: String, email: String): User
+  }
+
 `);
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
@@ -281,6 +293,17 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
           });
 
           return response;
+        },
+
+        createUser: async () => {
+          const { firstName, lastName, email }: any = request.body.variables;
+          const user = await fastify.db.users.create({
+            email,
+            firstName,
+            lastName,
+          });
+
+          return user;
         },
       };
 
