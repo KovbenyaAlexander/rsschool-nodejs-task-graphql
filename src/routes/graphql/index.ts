@@ -131,9 +131,21 @@ const schema = buildSchema(`
 
   input UpdateUserInput{
     id: String!
-    firstName: String,
-    lastName: String,
+    firstName: String
+    lastName: String
     email: String
+  }
+
+  input UpdateProfileInput{
+    id: String!
+    avatar: String
+    sex: String
+    birthday: Int
+    country: String
+    street: String
+    city: String
+    memberTypeId: String
+    userId: String
   }
 
   type Mutation{
@@ -142,6 +154,7 @@ const schema = buildSchema(`
     createPost(input: PostInput):Post
 
     updateUser(input: UpdateUserInput): User
+    updateProfile(input: UpdateProfileInput): Profile
 
   }
 `);
@@ -380,6 +393,13 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
             email,
           });
           return user;
+        },
+
+        updateProfile: async () => {
+          const input: any = request.body.variables!.input;
+
+          const profile = await fastify.db.profiles.change(input.id, input);
+          return profile;
         },
       };
 
