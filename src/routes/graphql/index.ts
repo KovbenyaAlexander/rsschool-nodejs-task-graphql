@@ -56,6 +56,15 @@ const schema = buildSchema(`
     memberType: MemberType
   }
 
+  type UserSubscribedTo{
+    id: String
+    firstName: String
+    lastName: String
+    email: String
+    userSubscribedTo: [String]
+    profile: Profile
+  }
+
   type Query {
     users: [User]
     memberTypes: [MemberType]
@@ -70,6 +79,9 @@ const schema = buildSchema(`
     getUsersInfo: [UsersInfo]
 
     getUserInfoById(userId: String): UserInfo
+
+    getUserSubscribedTo: [UserSubscribedTo]
+  
   }
 
 `);
@@ -180,19 +192,36 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
             equals: String(profile?.memberTypeId),
           });
 
-          console.log({
-            ...user,
-            posts,
-            profile,
-            memberType,
-          });
-
           return {
             ...user,
             posts,
             profile,
             memberType,
           };
+        },
+
+        getUserSubscribedTo: async () => {
+          const users = await fastify.db.users.findMany();
+
+          const response = users.map(async (user) => {
+            const userSubscribedTo = await fastify.db.users.findMany({
+              key: "subscribedToUserIds",
+              inArray: user.id,
+            });
+
+            const userProfile = await fastify.db.profiles.findOne({
+              key: "userId",
+              equals: user.id,
+            });
+
+            return {
+              ...user,
+              profile: userProfile,
+              userSubscribedTo,
+            };
+          });
+
+          return response;
         },
       };
 
