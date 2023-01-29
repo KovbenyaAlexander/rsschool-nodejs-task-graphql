@@ -45,6 +45,7 @@ const schema = buildSchema(`
     posts: [Post]
     profile: Profile
     memberType: MemberType
+    subscribedToUserIds: [String]
   }
 
   type UserInfo{
@@ -161,6 +162,16 @@ const schema = buildSchema(`
     monthPostsLimit: Int
   }
 
+  input SubscribeToInput{
+    subscribingUserId: String!
+    subscribedUserId: String!
+  }
+
+  input UnSubscribeFromInput{
+    unSubscribingUserId: String!
+    unSubscribedUserId: String!
+  }
+
   type Mutation{
     createUser(input: UserInput): User
     createProfile(input: ProfileInput):Profile
@@ -171,7 +182,8 @@ const schema = buildSchema(`
     updatePost(input: UpdatePostInput): Post
     updateMemberType(input: UpdateMemberTypeInput): MemberType
 
-
+    subscribeTo(input: SubscribeToInput): User
+    unSubscribeFrom(input: UnSubscribeFromInput): User
   }
 `);
 
@@ -434,6 +446,60 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
           );
 
           return memberType;
+        },
+
+        subscribeTo: async () => {
+          const { subscribingUserId, subscribedUserId }: any =
+            request.body.variables!.input;
+
+          const user = await fastify.db.users.findOne({
+            key: "id",
+            equals: subscribedUserId,
+          });
+
+          if (!user) {
+            throw new Error(`User doesn't exist`);
+          }
+          if (user.subscribedToUserIds.includes(subscribingUserId)) {
+            throw new Error(`User already subscribed`);
+          }
+
+          const newUser = await fastify.db.users.change(subscribedUserId, {
+            ...user,
+            subscribedToUserIds: [
+              ...user!.subscribedToUserIds,
+              subscribingUserId,
+            ],
+          });
+
+          return newUser;
+        },
+
+        unSubscribeFrom: async () => {
+          const { unSubscribingUserId, unSubscribedUserId }: any =
+            request.body.variables!.input;
+
+          const user = await fastify.db.users.findOne({
+            key: "id",
+            equals: unSubscribedUserId,
+          });
+          if (!user) {
+            throw new Error(`User doesn't exist`);
+          }
+
+          if (!user.subscribedToUserIds.includes(unSubscribingUserId)) {
+            throw new Error(`User doesn't subscribed`);
+          }
+
+          const newSubscribers = user.subscribedToUserIds.filter(
+            (id) => id !== unSubscribingUserId
+          );
+
+          const newUser = await fastify.db.users.change(unSubscribedUserId, {
+            ...user,
+            subscribedToUserIds: newSubscribers,
+          });
+          return newUser;
         },
       };
 
