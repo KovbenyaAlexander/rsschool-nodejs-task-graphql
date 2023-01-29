@@ -107,14 +107,10 @@ const schema = buildSchema(`
   }
 
 
-  input UserInput {
-    firstName: String!
-    lastName: String!
-    email: String!
-  }
-  
+
   type Mutation{
     createUser(firstName: String, lastName: String, email: String): User
+
     createProfile(      
       avatar: String,
       birthday: Int,
@@ -123,10 +119,10 @@ const schema = buildSchema(`
       memberTypeId: String,
       sex: String,
       street: String,
-      userId: String
-                  ):Profile
-  }
+      userId: String):Profile
 
+    createPost(title: String, content: String, userId: String):Post
+  }
 `);
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
@@ -339,6 +335,18 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
           });
 
           return profile;
+        },
+
+        createPost: async () => {
+          const { title, content, userId }: any = request.body.variables;
+
+          const post = await fastify.db.posts.create({
+            content,
+            title,
+            userId,
+          });
+
+          return post;
         },
       };
 
