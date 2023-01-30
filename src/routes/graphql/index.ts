@@ -45,7 +45,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         post: async () => {
           const id = String(request.body.variables!.postId);
           return await fastify.db.posts.findOne({
-            key: "userId",
+            key: "id",
             equals: id,
           });
         },
