@@ -1,4 +1,4 @@
-import DBEntity from './DBEntity';
+import DBEntity from "./DBEntity";
 
 export type MemberTypeEntity = {
   id: string;
@@ -6,7 +6,7 @@ export type MemberTypeEntity = {
   monthPostsLimit: number;
 };
 type CreateMemberTypeDTO = MemberTypeEntity;
-type ChangeMemberTypeDTO = Partial<Omit<MemberTypeEntity, 'id'>>;
+type ChangeMemberTypeDTO = Partial<Omit<MemberTypeEntity, "id">>;
 
 export default class DBMemberTypes extends DBEntity<
   MemberTypeEntity,
@@ -17,14 +17,19 @@ export default class DBMemberTypes extends DBEntity<
     super();
 
     this.create({
-      id: 'basic',
+      id: "basic",
       discount: 0,
       monthPostsLimit: 20,
     });
     this.create({
-      id: 'business',
+      id: "business",
       discount: 5,
       monthPostsLimit: 100,
+    });
+    this.create({
+      id: "memberTypeID_1",
+      discount: 555,
+      monthPostsLimit: 999,
     });
 
     const forbidOperationTrap: ProxyHandler<any> = {
